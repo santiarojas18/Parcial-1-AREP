@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
@@ -65,6 +66,7 @@ public class HttpServerCalculadora {
                 } else if (methodToCall.startsWith("class")) {
                     parametersFromMehtod = methodToCall.substring(6,methodToCall.length()-1);
                     finalParameters = separateParameters(parametersFromMehtod);
+                    answer = executeClass(finalParameters);
                 } else if (methodToCall.startsWith("invoke")) {
                     parametersFromMehtod = methodToCall.substring(7,methodToCall.length()-1);
                     finalParameters = separateParameters(parametersFromMehtod);
@@ -86,6 +88,22 @@ public class HttpServerCalculadora {
             clientSocket.close();
         }
         serverSocket.close();
+    }
+
+    private static String executeClass(String[] parameters) throws ClassNotFoundException {
+        Class myClass = Class.forName(parameters[0]);
+        Field[] response = myClass.getDeclaredFields();
+        Method[] response2 = myClass.getDeclaredMethods();
+        StringBuilder finalResponse = new StringBuilder("Campos declarados: ");
+        for (Field f: response ) {
+            finalResponse.append(f.getName());
+        }
+        finalResponse.append("Metodos declarados: ");
+        for (Method m: response2 ) {
+            finalResponse.append(m.getName());
+        }
+
+        return finalResponse.toString();
     }
 
     private static String executeBinary(String[] parameters) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
