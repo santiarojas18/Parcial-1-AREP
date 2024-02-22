@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Hello world!
@@ -13,7 +15,7 @@ import java.net.Socket;
  */
 public class HttpServer
 {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, URISyntaxException {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(35000);
@@ -21,6 +23,8 @@ public class HttpServer
             System.err.println("Could not listen on port: 35000.");
             System.exit(1);
         }
+
+        HttpConnectionExample connectionToApi = new HttpConnectionExample();
 
         boolean running = true;
         while (running) {
@@ -50,7 +54,7 @@ public class HttpServer
                 System.out.println("Recibí: " + inputLine);
                 if (!in.ready()) {break; }
             }
-
+            URI uriObject = new URI(uri);
             outputLine = "";
             if (uri.startsWith("/cliente")) {
                 outputLine = "HTTP/1.1 200 OK\r\n"
@@ -64,10 +68,10 @@ public class HttpServer
                         "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
                         "    </head>\n" +
                         "    <body>\n" +
-                        "        <h1>Form with GET</h1>\n" +
+                        "        <h1>Calculadora</h1>\n" +
                         "        <form action=\"/hello\">\n" +
-                        "            <label for=\"name\">Name:</label><br>\n" +
-                        "            <input type=\"text\" id=\"name\" name=\"name\" value=\"John\"><br><br>\n" +
+                        "            <label for=\"name\">Ingrese la función que desea ejecutar:</label><br>\n" +
+                        "            <input type=\"text\" id=\"name\" name=\"name\" value=\"binaryInvoke(java.lang.Math, max, double, 4.5, double, -3.7)\"><br><br>\n" +
                         "            <input type=\"button\" value=\"Submit\" onclick=\"loadGetMsg()\">\n" +
                         "        </form> \n" +
                         "        <div id=\"getrespmsg\"></div>\n" +
@@ -80,13 +84,17 @@ public class HttpServer
                         "                    document.getElementById(\"getrespmsg\").innerHTML =\n" +
                         "                    this.responseText;\n" +
                         "                }\n" +
-                        "                xhttp.open(\"GET\", \"/hello?name=\"+nameVar);\n" +
+                        "                xhttp.open(\"GET\", \"http://localhost:35000/consulta?comando=\"+nameVar);\n" +
                         "                xhttp.send();\n" +
                         "            }\n" +
                         "        </script>\n" +
                         "\n" +
                         "</html>";
-            } else {
+            } else if (uri.startsWith("/consulta")) {
+                outputLine =  "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: text/html\r\n"
+                        + "\r\n" + connectionToApi.consult("compreflex" + uri.replace("/consulta", "")).toString();
+            }else {
                 outputLine = "HTTP/1.1 404 NOT FOUND\r\n"
                         + "Content-Type: text/html\r\n"
                         + "\r\n"

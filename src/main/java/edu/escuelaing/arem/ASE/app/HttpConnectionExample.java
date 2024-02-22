@@ -23,11 +23,12 @@ public class HttpConnectionExample {
         int responseCode = con.getResponseCode();
         System.out.println("GET Response Code :: " + responseCode);
 
+        StringBuffer response = new StringBuffer();
         if (responseCode == HttpURLConnection.HTTP_OK) { // success
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     con.getInputStream()));
             String inputLine;
-            StringBuffer response = new StringBuffer();
+
 
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
@@ -40,6 +41,6 @@ public class HttpConnectionExample {
             System.out.println("GET request not worked");
         }
         System.out.println("GET DONE");
-        return null;
+        return response;
     }
 }
